@@ -7,6 +7,10 @@ from PIL import ImageTk, Image
 import ttkbootstrap  # Import ttkbootstrap library for styling the Tkinter application
 from io import BytesIO  # Import BytesIO from io to handle image data
 import random  # Import random for theme selection
+import openai
+
+
+openai.api_key = "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"
 
 # Create the Tkinter window
 root = ttkbootstrap.Window(themename='morph')
@@ -62,6 +66,20 @@ def search():
     temp_label.configure(text=f'{temperature:.2f}°C')
     desc_label.configure(text=f'Description: {description}')
 
+    # Generate suggestion based on weather description
+    prompt = f"What to do during {description.lower()} weather?"
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=prompt,
+        max_tokens=50,
+        n=1,
+        stop=None,
+        temperature=0.7
+    )
+    suggestion = response.choices[0].text.strip()
+    suggestion_label.configure(text=suggestion)
+
+
 # Function to handle the theme change button click
 
 
@@ -107,10 +125,15 @@ themes = style.theme_names()
 theme_frame = ttkbootstrap.Frame(root)
 theme_frame.place(relx=1, rely=1, anchor='se', bordermode='outside')
 
+# Create label widget to display weather suggestion
+suggestion_label = tk.Label(root, font='comicsans,50', wraplength=400)
+suggestion_label.grid(row=5, column=0, columnspan=2, pady=20, sticky='n')
+
 # Create the theme change button inside the frame
 theme_button = ttkbootstrap.Button(
     theme_frame, text="Change Theme", command=theme_change, bootstyle="darkly")
 theme_button.pack(padx=5, pady=5)
+
 
 # Start the main event loop
 root.mainloop()
